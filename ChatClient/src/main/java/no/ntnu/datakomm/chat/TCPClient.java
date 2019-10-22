@@ -22,14 +22,12 @@ public class TCPClient {
      * @param port TCP port of the chat server
      * @return True on success, false otherwise
      */
-    public boolean connect(String host, int port)
-    {
+    public boolean connect(String host, int port) {
         // Step 1:
 
         boolean attempt = false;
 
-        try
-        {
+        try {
             connection = new Socket(host, port);
             attempt = true;
 
@@ -38,8 +36,7 @@ public class TCPClient {
             InputStream inputStream = connection.getInputStream();
             fromServer = new BufferedReader(new InputStreamReader(inputStream));
 
-        } catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -73,11 +70,46 @@ public class TCPClient {
      * @param cmd A command. It should include the command word and optional attributes, according to the protocol.
      * @return true on success, false otherwise
      */
-    private boolean sendCommand(String cmd) {
-        // TODO Step 2: Implement this method
+    private boolean sendCommand(String cmd)
+    {
+        // Step 2
         // Hint: Remember to check if connection is active
-        return false;
+        boolean attempt = false;
+
+        // Check if the connection is active
+        if (cmd != null) {
+            String editedCutCmdCommand = null;
+            String[] parts = cmd.split(" ");
+            String cmdCommand = parts[0];
+
+            if (cmdCommand.startsWith("/")) {
+                String cutCmdCommand = cmdCommand.replace("/", "");
+                if (cutCmdCommand.endsWith("\n")) {
+                    editedCutCmdCommand = cutCmdCommand.replace("\n", "");
+                } else {
+                    editedCutCmdCommand = cutCmdCommand;
+                }
+
+                if (editedCutCmdCommand.equals("privmsg") ||
+                        editedCutCmdCommand.equals("help") ||
+                        editedCutCmdCommand.equals("login") ||
+                        editedCutCmdCommand.equals("users")) {
+                    String editedCmd = cmd.substring(1, cmd.length());
+
+                    // Print out the console for debugging purposes
+                    System.out.println("Sending command: " + editedCmd);
+                    attempt = true;
+                    toServer.println(editedCmd);
+                }
+            } else {
+                System.out.println("Sending message: " + cmd);
+                attempt = true;
+                toServer.println("msg " + cmd);
+            }
+        }
+        return attempt;
     }
+
 
     /**
      * Send a public message to all the recipients.
@@ -85,11 +117,23 @@ public class TCPClient {
      * @param message Message to send
      * @return true if message sent, false on error
      */
-    public boolean sendPublicMessage(String message) {
-        // TODO Step 2: implement this method
+    public boolean sendPublicMessage(String message)
+    {
+        // Step 2:
         // Hint: Reuse sendCommand() method
         // Hint: update lastError if you want to store the reason for the error.
-        return false;
+        boolean attempt = false;
+
+        if (message != null)
+        {
+            sendCommand(message);
+            attempt = true;
+        }
+        else
+        {
+            System.out.println("Not a valid message");
+        }
+        return attempt;
     }
 
     /**
