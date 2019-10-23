@@ -1,7 +1,12 @@
 package no.ntnu.datakomm.chat;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -108,10 +113,11 @@ public class TCPClient
             if (cmdCommand.startsWith("/"))
             {
                 String cutCmdCommand = cmdCommand.replace("/", "");
-                if (cutCmdCommand.endsWith("\n")) {
+                if (cutCmdCommand.endsWith("\n"))
+                {
                     editedCutCmdCommand = cutCmdCommand.replace("\n", "");
                 }
-                else
+                     else
                     {
                     editedCutCmdCommand = cutCmdCommand;
                     }
@@ -119,7 +125,8 @@ public class TCPClient
                 if (editedCutCmdCommand.equals("privmsg") ||
                         editedCutCmdCommand.equals("help") ||
                         editedCutCmdCommand.equals("login") ||
-                        editedCutCmdCommand.equals("users")) {
+                        editedCutCmdCommand.equals("users"))
+                {
                     String editedCmd = cmd.substring(1, cmd.length());
 
                     // Print out the console for debugging purposes
@@ -128,7 +135,7 @@ public class TCPClient
                     toServer.println(editedCmd);
                 }
             }
-            else
+                else
                 {
                 System.out.println("Sending message: " + cmd);
                 attempt = true;
@@ -270,7 +277,8 @@ public class TCPClient
     /**
      * Start listening for incoming commands from the server in a new CPU thread.
      */
-    public void startListenThread() {
+    public void startListenThread()
+    {
         // Call parseIncomingCommands() in the new thread.
         Thread t = new Thread(() -> {
             parseIncomingCommands();
@@ -372,7 +380,8 @@ public class TCPClient
      */
     public void addListener(ChatListener listener)
     {
-        if (!listeners.contains(listener)) {
+        if (!listeners.contains(listener))
+        {
             listeners.add(listener);
         }
     }
@@ -402,7 +411,8 @@ public class TCPClient
      */
     private void onLoginResult(boolean success, String errMsg)
     {
-        for (ChatListener l : listeners) {
+        for (ChatListener l : listeners)
+        {
             l.onLoginResult(success, errMsg);
         }
     }
@@ -415,6 +425,7 @@ public class TCPClient
     {
         // Step 4: Implement this method
         // Hint: all the onXXX() methods will be similar to onLoginResult()
+
         for (ChatListener l : listeners)
         {
             l.onDisconnect();
