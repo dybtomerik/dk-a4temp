@@ -5,7 +5,8 @@ import java.net.*;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TCPClient {
+public class TCPClient
+{
     private PrintWriter toServer;
     private BufferedReader fromServer;
     private Socket connection;
@@ -52,9 +53,25 @@ public class TCPClient {
      * in the process of being closed. with "synchronized" keyword we make sure
      * that no two threads call this method in parallel.
      */
-    public synchronized void disconnect() {
-        // TODO Step 4: implement this method
+    public synchronized void disconnect()
+    {
+        // Step 4: implement this method
         // Hint: remember to check if connection is active
+
+        if (isConnectionActive())
+        {
+
+            try
+            {
+             connection.close();
+             connection = null;
+             onDisconnect();
+            }
+            catch (IOException e)
+            {
+                lastError = "Could not close the socket. " + e.getMessage();
+            }
+        }
     }
 
     /**
@@ -191,7 +208,7 @@ public class TCPClient {
     private String waitServerResponse()
     {
         // Step 3:
-        // TODO Step 4: If you get I/O Exception or null from the stream, it means that something has gone wrong
+        // Step 4: If you get I/O Exception or null from the stream, it means that something has gone wrong
         // with the stream and hence the socket. Probably a good idea to close the socket in that case.
 
         String response = null;
@@ -217,12 +234,16 @@ public class TCPClient {
      *
      * @return Error message or "" if there has been no error
      */
-    public String getLastError() {
-        if (lastError != null) {
+    public String getLastError()
+    {
+        if (lastError != null)
+        {
             return lastError;
-        } else {
-            return "";
         }
+        else
+            {
+            return "";
+            }
     }
 
     /**
@@ -349,9 +370,14 @@ public class TCPClient {
      * Notify listeners that socket was closed by the remote end (server or
      * Internet error)
      */
-    private void onDisconnect() {
-        // TODO Step 4: Implement this method
+    private void onDisconnect()
+    {
+        // Step 4: Implement this method
         // Hint: all the onXXX() methods will be similar to onLoginResult()
+        for (ChatListener l : listeners)
+        {
+            l.onDisconnect();
+        }
     }
 
     /**
@@ -398,7 +424,8 @@ public class TCPClient {
      *
      * @param commands Commands supported by the server
      */
-    private void onSupported(String[] commands) {
+    private void onSupported(String[] commands)
+    {
         // TODO Step 8: Implement this method
     }
 }
