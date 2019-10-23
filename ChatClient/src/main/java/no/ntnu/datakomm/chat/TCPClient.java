@@ -23,7 +23,8 @@ public class TCPClient
      * @param port TCP port of the chat server
      * @return True on success, false otherwise
      */
-    public boolean connect(String host, int port) {
+    public boolean connect(String host, int port)
+    {
         // Step 1:
 
         boolean attempt = false;
@@ -170,10 +171,13 @@ public class TCPClient
      * Send a request for latest user list to the server. To get the new users,
      * clear your current user list and use events in the listener.
      */
-    public void refreshUserList() {
-        // TODO Step 5: implement this method
+    public void refreshUserList()
+    {
+        // Step 5: implement this method
         // Hint: Use Wireshark and the provided chat client reference app to find out what commands the
         // client and server exchange for user listing.
+
+        sendCommand( "/users");
     }
 
     /**
@@ -274,6 +278,8 @@ public class TCPClient
             // and act on it.
             // Hint: In Step 3 you need to handle only login-related responses.
             // Hint: In Step 3 reuse onLoginResult() method
+            // Step 5: update this method, handle user-list response from the server
+            // Hint: In Step 5 reuse onUserList() method
 
             if (response != null)
             {
@@ -313,9 +319,6 @@ public class TCPClient
                     e.printStackTrace();
                 }
 
-                // TODO Step 5: update this method, handle user-list response from the server
-                // Hint: In Step 5 reuse onUserList() method
-
                 // TODO Step 7: add support for incoming chat messages from other users (types: msg, privmsg)
                 // TODO Step 7: add support for incoming message errors (type: msgerr)
                 // TODO Step 7: add support for incoming command errors (type: cmderr)
@@ -332,7 +335,8 @@ public class TCPClient
      *
      * @param listener
      */
-    public void addListener(ChatListener listener) {
+    public void addListener(ChatListener listener)
+    {
         if (!listeners.contains(listener)) {
             listeners.add(listener);
         }
@@ -343,7 +347,8 @@ public class TCPClient
      *
      * @param listener
      */
-    public void removeListener(ChatListener listener) {
+    public void removeListener(ChatListener listener)
+    {
         listeners.remove(listener);
     }
 
@@ -360,7 +365,8 @@ public class TCPClient
      * @param success When true, login successful. When false, it failed
      * @param errMsg  Error message if any
      */
-    private void onLoginResult(boolean success, String errMsg) {
+    private void onLoginResult(boolean success, String errMsg)
+    {
         for (ChatListener l : listeners) {
             l.onLoginResult(success, errMsg);
         }
@@ -385,8 +391,14 @@ public class TCPClient
      *
      * @param users List with usernames
      */
-    private void onUsersList(String[] users) {
-        // TODO Step 5: Implement this method
+    private void onUsersList(String[] users)
+    {
+        // Step 5: Implement this method
+
+        for (ChatListener l : listeners)
+        {
+            l.onUserList(users);
+        }
     }
 
     /**
