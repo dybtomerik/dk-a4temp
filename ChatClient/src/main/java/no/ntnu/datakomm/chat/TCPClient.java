@@ -13,6 +13,8 @@ public class TCPClient
 
     // Hint: if you want to store a message for the last error, store it here
     private String lastError = null;
+    // Store the list of users her
+    private String[] userList = null;
 
     private final List<ChatListener> listeners = new LinkedList<>();
 
@@ -29,7 +31,8 @@ public class TCPClient
 
         boolean attempt = false;
 
-        try {
+        try
+        {
             connection = new Socket(host, port);
             attempt = true;
 
@@ -37,8 +40,9 @@ public class TCPClient
             toServer = new PrintWriter(outputStream, true);
             InputStream inputStream = connection.getInputStream();
             fromServer = new BufferedReader(new InputStreamReader(inputStream));
-
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             e.printStackTrace();
         }
 
@@ -61,7 +65,6 @@ public class TCPClient
 
         if (isConnectionActive())
         {
-
             try
             {
              connection.close();
@@ -78,7 +81,8 @@ public class TCPClient
     /**
      * @return true if the connection is active (opened), false if not.
      */
-    public boolean isConnectionActive() {
+    public boolean isConnectionActive()
+    {
         return connection != null;
     }
 
@@ -95,18 +99,22 @@ public class TCPClient
         boolean attempt = false;
 
         // Check if the connection is active
-        if (cmd != null) {
+        if (cmd != null)
+        {
             String editedCutCmdCommand = null;
             String[] parts = cmd.split(" ");
             String cmdCommand = parts[0];
 
-            if (cmdCommand.startsWith("/")) {
+            if (cmdCommand.startsWith("/"))
+            {
                 String cutCmdCommand = cmdCommand.replace("/", "");
                 if (cutCmdCommand.endsWith("\n")) {
                     editedCutCmdCommand = cutCmdCommand.replace("\n", "");
-                } else {
-                    editedCutCmdCommand = cutCmdCommand;
                 }
+                else
+                    {
+                    editedCutCmdCommand = cutCmdCommand;
+                    }
 
                 if (editedCutCmdCommand.equals("privmsg") ||
                         editedCutCmdCommand.equals("help") ||
@@ -119,11 +127,13 @@ public class TCPClient
                     attempt = true;
                     toServer.println(editedCmd);
                 }
-            } else {
+            }
+            else
+                {
                 System.out.println("Sending message: " + cmd);
                 attempt = true;
                 toServer.println("msg " + cmd);
-            }
+                }
         }
         return attempt;
     }
@@ -187,10 +197,14 @@ public class TCPClient
      * @param message   Message to send
      * @return true if message sent, false on error
      */
-    public boolean sendPrivateMessage(String recipient, String message) {
-        // TODO Step 6: Implement this method
+    public boolean sendPrivateMessage(String recipient, String message)
+    {
+        // Step 6: Implement this method
         // Hint: Reuse sendCommand() method
         // Hint: update lastError if you want to store the reason for the error.
+
+       sendCommand( "/privmsg " + recipient + " " + message);
+
         return false;
     }
 
