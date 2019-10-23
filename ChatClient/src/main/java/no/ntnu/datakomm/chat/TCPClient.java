@@ -18,7 +18,7 @@ public class TCPClient
 
     // Hint: if you want to store a message for the last error, store it here
     private String lastError = null;
-    // Store the list of users her
+    // Store the list of users here
     private String[] userList = null;
 
     private final List<ChatListener> listeners = new LinkedList<>();
@@ -50,7 +50,6 @@ public class TCPClient
         {
             e.printStackTrace();
         }
-
         return attempt;
     }
 
@@ -104,47 +103,47 @@ public class TCPClient
         boolean attempt = false;
 
         // Check if the connection is active
-        if (cmd != null)
+        if (isConnectionActive())
         {
-            String editedCutCmdCommand = null;
-            String[] parts = cmd.split(" ");
-            String cmdCommand = parts[0];
-
-            if (cmdCommand.startsWith("/"))
+            if (cmd != null)
             {
-                String cutCmdCommand = cmdCommand.replace("/", "");
-                if (cutCmdCommand.endsWith("\n"))
+                String editedCutCmdCommand = null;
+                String[] parts = cmd.split(" ");
+                String cmdCommand = parts[0];
+
+                if (cmdCommand.startsWith("/"))
                 {
-                    editedCutCmdCommand = cutCmdCommand.replace("\n", "");
-                }
-                     else
+                    String cutCmdCommand = cmdCommand.replace("/", "");
+                    if (cutCmdCommand.endsWith("\n"))
                     {
-                    editedCutCmdCommand = cutCmdCommand;
+                        editedCutCmdCommand = cutCmdCommand.replace("\n", "");
+                    } else
+                        {
+                        editedCutCmdCommand = cutCmdCommand;
                     }
 
-                if (editedCutCmdCommand.equals("privmsg") ||
-                        editedCutCmdCommand.equals("help") ||
-                        editedCutCmdCommand.equals("login") ||
-                        editedCutCmdCommand.equals("users"))
-                {
-                    String editedCmd = cmd.substring(1, cmd.length());
+                    if (editedCutCmdCommand.equals("privmsg") ||
+                            editedCutCmdCommand.equals("help") ||
+                            editedCutCmdCommand.equals("login") ||
+                            editedCutCmdCommand.equals("users"))
+                    {
+                        String editedCmd = cmd.substring(1, cmd.length());
 
-                    // Print out the console for debugging purposes
-                    System.out.println("Sending command: " + editedCmd);
+                        // Print out the console for debugging purposes
+                        System.out.println("Sending command: " + editedCmd);
+                        attempt = true;
+                        toServer.println(editedCmd);
+                    }
+                } else
+                    {
+                    System.out.println("Sending message: " + cmd);
                     attempt = true;
-                    toServer.println(editedCmd);
+                    toServer.println("msg " + cmd);
                 }
             }
-                else
-                {
-                System.out.println("Sending message: " + cmd);
-                attempt = true;
-                toServer.println("msg " + cmd);
-                }
         }
-        return attempt;
-    }
-
+            return attempt;
+        }
 
     /**
      * Send a public message to all the recipients.
@@ -201,7 +200,7 @@ public class TCPClient
      * Send a private message to a single recipient.
      *
      * @param recipient username of the chat user who should receive the message
-     * @param message   Message to send
+     * @param message  Message to send
      * @return true if message sent, false on error
      */
     public boolean sendPrivateMessage(String recipient, String message)
@@ -224,7 +223,7 @@ public class TCPClient
         // Step 8: Implement this method
         // Hint: Reuse sendCommand() method
 
-        sendCommand( "/help");
+        sendCommand("/help");
     }
 
 
@@ -280,7 +279,8 @@ public class TCPClient
     public void startListenThread()
     {
         // Call parseIncomingCommands() in the new thread.
-        Thread t = new Thread(() -> {
+        Thread t = new Thread(() ->
+        {
             parseIncomingCommands();
         });
         t.start();
@@ -311,15 +311,12 @@ public class TCPClient
             // Hint for Step 7: call corresponding onXXX() methods which will notify all the listeners
             // Step 8: add support for incoming supported command list (type: supported)
 
-            if (response != null)
-            {
+            if (response != null) {
                 String[] parts = response.split("");
                 String firstPart = parts[0];
 
-                try
-                {
-                    switch (firstPart)
-                    {
+                try {
+                    switch (firstPart) {
                         case "loginok":
                             onLoginResult(true, response);
                             break;
@@ -330,7 +327,7 @@ public class TCPClient
 
                         case "users":
                             String cutString = response.replaceFirst("users", "");
-                            String[] userList = cutString.split(" ");
+                            userList = cutString.split(" ");
                             onUsersList(userList);
                             break;
 
@@ -343,11 +340,11 @@ public class TCPClient
                             break;
 
                         case "privmsg":
-                            String cutCmdPrivMsgString = response.replaceFirst("privmsg", "");
+                            String cutCmdPrivMsgString = response.replaceFirst("privmsg ", "");
                             String[] privMsgParts = cutCmdPrivMsgString.split(" ");
                             String privSender = privMsgParts[0];
                             String cutCmdAndPrivSenderString = cutCmdPrivMsgString.replace(privSender + " ", "");
-                            onMsgReceived(false, privSender, cutCmdAndPrivSenderString);
+                            onMsgReceived(true, privSender, cutCmdAndPrivSenderString);
                             break;
 
                         case "msgeer":
@@ -356,14 +353,14 @@ public class TCPClient
 
                         case "cmdeer":
                             onCmdError(response);
+                            break;
 
                         case "supported":
-                            String cutCmdSupportedString = response.replaceFirst("supported", "");
-                            String[] supportedParts = cutCmdSupportedString.split( " ");
+                            String cutCmdSupportedString = response.replaceFirst("supported ", "");
+                            String[] supportedParts = cutCmdSupportedString.split(" ");
                             onSupported(supportedParts);
                             break;
                     }
-
                 }
                 catch (Exception e)
                 {
@@ -375,8 +372,6 @@ public class TCPClient
 
     /**
      * Register a new listener for events (login result, incoming message, etc)
-     *
-     * @param listener
      */
     public void addListener(ChatListener listener)
     {
@@ -388,8 +383,6 @@ public class TCPClient
 
     /**
      * Unregister an event listener
-     *
-     * @param listener
      */
     public void removeListener(ChatListener listener)
     {
@@ -403,8 +396,7 @@ public class TCPClient
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Notify listeners that login operation is complete (either with success or
-     * failure)
+     * Notify listeners that login operation is complete (either with success or failure)
      *
      * @param success When true, login successful. When false, it failed
      * @param errMsg  Error message if any
@@ -418,8 +410,7 @@ public class TCPClient
     }
 
     /**
-     * Notify listeners that socket was closed by the remote end (server or
-     * Internet error)
+     * Notify listeners that socket was closed by the remote end (server or Internet error)
      */
     private void onDisconnect()
     {
@@ -473,7 +464,7 @@ public class TCPClient
     {
         // Step 7: Implement this method
 
-        for (ChatListener l : listeners)
+        for(ChatListener l : listeners)
         {
             l.onMessageError(errMsg);
         }
@@ -488,15 +479,14 @@ public class TCPClient
     {
         // Step 7: Implement this method
 
-        for (ChatListener l : listeners)
+        for(ChatListener l : listeners)
         {
             l.onCommandError(errMsg);
         }
     }
 
     /**
-     * Notify listeners that a help response (supported commands) was received
-     * from the server
+     * Notify listeners that a help response (supported commands) was received from the server
      *
      * @param commands Commands supported by the server
      */
