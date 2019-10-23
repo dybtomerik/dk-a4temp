@@ -212,9 +212,12 @@ public class TCPClient
     /**
      * Send a request for the list of commands that server supports.
      */
-    public void askSupportedCommands() {
-        // TODO Step 8: Implement this method
+    public void askSupportedCommands()
+    {
+        // Step 8: Implement this method
         // Hint: Reuse sendCommand() method
+
+        sendCommand( "/help");
     }
 
 
@@ -294,6 +297,11 @@ public class TCPClient
             // Hint: In Step 3 reuse onLoginResult() method
             // Step 5: update this method, handle user-list response from the server
             // Hint: In Step 5 reuse onUserList() method
+            // Step 7: add support for incoming chat messages from other users (types: msg, privmsg)
+            // Step 7: add support for incoming message errors (type: msgerr)
+            // Step 7: add support for incoming command errors (type: cmderr)
+            // Hint for Step 7: call corresponding onXXX() methods which will notify all the listeners
+            // Step 8: add support for incoming supported command list (type: supported)
 
             if (response != null)
             {
@@ -325,6 +333,27 @@ public class TCPClient
                             String cutCmdAndSenderString = cutCmdMsgString.replace(sender + " ", "");
                             onMsgReceived(false, sender, cutCmdAndSenderString);
                             break;
+
+                        case "privmsg":
+                            String cutCmdPrivMsgString = response.replaceFirst("privmsg", "");
+                            String[] privMsgParts = cutCmdPrivMsgString.split(" ");
+                            String privSender = privMsgParts[0];
+                            String cutCmdAndPrivSenderString = cutCmdPrivMsgString.replace(privSender + " ", "");
+                            onMsgReceived(false, privSender, cutCmdAndPrivSenderString);
+                            break;
+
+                        case "msgeer":
+                            onMsgError(response);
+                            break;
+
+                        case "cmdeer":
+                            onCmdError(response);
+
+                        case "supported":
+                            String cutCmdSupportedString = response.replaceFirst("supported", "");
+                            String[] supportedParts = cutCmdSupportedString.split( " ");
+                            onSupported(supportedParts);
+                            break;
                     }
 
                 }
@@ -332,14 +361,6 @@ public class TCPClient
                 {
                     e.printStackTrace();
                 }
-
-                // TODO Step 7: add support for incoming chat messages from other users (types: msg, privmsg)
-                // TODO Step 7: add support for incoming message errors (type: msgerr)
-                // TODO Step 7: add support for incoming command errors (type: cmderr)
-                // Hint for Step 7: call corresponding onXXX() methods which will notify all the listeners
-
-                // TODO Step 8: add support for incoming supported command list (type: supported)
-
             }
         }
     }
@@ -422,8 +443,14 @@ public class TCPClient
      * @param sender Username of the sender
      * @param text   Message text
      */
-    private void onMsgReceived(boolean priv, String sender, String text) {
-        // TODO Step 7: Implement this method
+    private void onMsgReceived(boolean priv, String sender, String text)
+    {
+        // Step 7: Implement this method
+
+        for (ChatListener l : listeners)
+        {
+            l.onMessageReceived(new TextMessage(sender, priv, text));
+        }
     }
 
     /**
@@ -431,8 +458,14 @@ public class TCPClient
      *
      * @param errMsg Error description returned by the server
      */
-    private void onMsgError(String errMsg) {
-        // TODO Step 7: Implement this method
+    private void onMsgError(String errMsg)
+    {
+        // Step 7: Implement this method
+
+        for (ChatListener l : listeners)
+        {
+            l.onMessageError(errMsg);
+        }
     }
 
     /**
@@ -440,8 +473,14 @@ public class TCPClient
      *
      * @param errMsg Error message
      */
-    private void onCmdError(String errMsg) {
-        // TODO Step 7: Implement this method
+    private void onCmdError(String errMsg)
+    {
+        // Step 7: Implement this method
+
+        for (ChatListener l : listeners)
+        {
+            l.onCommandError(errMsg);
+        }
     }
 
     /**
@@ -452,6 +491,11 @@ public class TCPClient
      */
     private void onSupported(String[] commands)
     {
-        // TODO Step 8: Implement this method
+        // Step 8: Implement this method
+
+        for(ChatListener l : listeners)
+        {
+            l.onSupportedCommands(commands);
+        }
     }
 }
