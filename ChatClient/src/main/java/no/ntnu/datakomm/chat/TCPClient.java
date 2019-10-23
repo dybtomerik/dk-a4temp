@@ -45,8 +45,8 @@ public class TCPClient
             toServer = new PrintWriter(outputStream, true);
             InputStream inputStream = connection.getInputStream();
             fromServer = new BufferedReader(new InputStreamReader(inputStream));
-        }
-        catch (IOException e)
+
+        } catch (IOException e)
         {
             e.printStackTrace();
         }
